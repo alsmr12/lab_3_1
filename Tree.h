@@ -121,7 +121,7 @@ public:
         std::cout << "], Info: " << tree->info << std::endl;
         traverse(tree->right);
     }
-
+    /*
     /// Функция для удаления элемента из K-D дерева
     Node* deleteNode(Node* tree, const int* keys, int depth = 0) {
         if (tree == nullptr) {
@@ -159,7 +159,118 @@ public:
         }
 
         return tree;
+    }*/
+    const int k = 3;
+
+    Node *minNode(Node *x, Node *y, Node *z, int d)
+    {
+        Node *res = x;
+        if (y != NULL && y->key[d] < res->key[d])
+            res = y;
+        if (z != NULL && z->key[d] < res->key[d])
+            res = z;
+        return res;
     }
+
+    Node *findMinRec(Node* root, int d, unsigned depth)
+    {
+        // Base cases
+        if (root == NULL)
+            return NULL;
+
+        // Current dimension is computed using current depth and total
+        // dimensions (k)
+        unsigned cd = depth % k;
+
+        // Compare point with root with respect to cd (Current dimension)
+        if (cd == d)
+        {
+            if (root->left == NULL)
+                return root;
+            return findMinRec(root->left, d, depth+1);
+        }
+
+        // If current dimension is different then minimum can be anywhere
+        // in this subtree
+        return minNode(root,
+                       findMinRec(root->left, d, depth+1),
+                       findMinRec(root->right, d, depth+1), d);
+    }
+
+// A wrapper over findMinRec(). Returns minimum of d'th dimension
+    Node *findMin(Node* root, int d)
+    {
+        // Pass current level or depth as 0
+        return findMinRec(root, d, 0);
+    }
+
+// A utility method to determine if two Points are same
+// in K Dimensional space
+    bool arePointsSame(const int* p1, const int*p2)
+    {
+        // Compare individual pointinate values
+        for (int i = 0; i < k; ++i)
+            if (p1[i] != p2[i])
+                return false;
+
+        return true;
+    }
+
+// Copies point p2 to p1
+    void copyPoint(int* k1, int* k2)
+    {
+        for (int i=0; i<k; i++)
+            k1[i] = k2[i];
+    }
+
+// Function to delete a given point 'point[]' from tree with root
+// as 'root'.  depth is current depth and passed as 0 initially.
+// Returns root of the modified tree.
+    Node *deleteNode(Node *root, const int* keys, int depth = 0)
+    {
+        // Given point is not present
+        if (root == NULL)
+            return NULL;
+        // Find dimension of current node
+        int cd = depth % k;
+
+        // If the point to be deleted is present at root
+        if (arePointsSame(root->key, keys))
+        {
+            // 2.b If right child is not NULL
+            if (root->right != NULL)
+            {
+                // Find minimum of root's dimension in right subtree
+                Node *min = findMin(root->right, cd);
+
+                // Copy the minimum to root
+                copyPoint(root->key, min->key);
+
+                // Recursively delete the minimum
+                root->right = deleteNode(root->right, min->key, depth+1);
+            }
+            else if (root->left != NULL) // same as above
+            {
+                Node *min = findMin(root->left, cd);
+                copyPoint(root->key, min->key);
+                root->right = deleteNode(root->left, min->key, depth+1);
+            }
+            else // If node to be deleted is leaf node
+            {
+                delete root;
+                return nullptr;
+            }
+            return root;
+        }
+
+        // 2) If current node doesn't contain point, search downward
+        if (keys[cd] < root->key[cd])
+            root->left = deleteNode(root->left, keys, depth+1);
+        else
+            root->right = deleteNode(root->right, keys, depth+1);
+        return root;
+    }
+//////////////////////////////////
 
     Node* find(Node* tree, const int* searchKey, int depth = 0){
         if (tree == nullptr) {

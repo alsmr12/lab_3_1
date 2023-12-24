@@ -64,14 +64,28 @@ TEST_CASE("Position: set_x, set_y, set_z") {
 }
 
 
-TEST_CASE("Container: конструктор и геттеры") {
+TEST_CASE("size and Container: конструктор и геттеры") {
     Size size(10, 20, 30);
+    Size size1(10, 20, 30);
+    Size size3(10, 20, 0);
+    REQUIRE(size == size1);
+    REQUIRE(size != size3);
+    size.transpose();
     Position position(1, 2, 3);
     Container container(1, "Client", size, 100, 50, position);
     REQUIRE(container.get_container_number() == 1);
     REQUIRE(container.get_information_container() == "Container Number: 1\nClient: Client\nSize: 10x20x30\nCost: 100\nWeight: 50");
     REQUIRE(container.get_weight() == 50);
     REQUIRE(container.get_cost() == 100);
+    container.set_number(100);
+    REQUIRE(container.get_container_number() == 100);
+    //REQUIRE(container.get_container_type() == "Unknown");
+    REQUIRE(container.get_information_container() == "Container Number: 100\n"
+                                                     "Client: Client\n"
+                                                     "Size: 10x20x30\n"
+                                                     "Cost: 100\n"
+                                                     "Weight: 50");
+    container.set_position(Position(0,0,0));
     REQUIRE(!container.is_fragile());
 }
 
@@ -100,6 +114,42 @@ TEST_CASE("Fragile_Container: конструктор и геттеры") {
     REQUIRE(fragileContainer.get_cost() == 200);
     
     REQUIRE(fragileContainer.is_fragile());
+}
+
+TEST_CASE("Warehouse constr") {
+    Warehouse w;
+    Warehouse w1(1, Size(10, 10, 10), 27);
+    REQUIRE(w1.get_number() == 1);
+    REQUIRE(w1.get_dimensions().get_length() == 10);
+    REQUIRE(w1.get_dimensions().get_width() == 10);
+    REQUIRE(w1.get_dimensions().get_height() == 10);
+}
+
+TEST_CASE("add cont") {
+    Warehouse w1(1, Size(10, 10, 10), 27);
+    Container *c_ptr = w1.search_container(Position(0, 0, 0));
+    REQUIRE(c_ptr == nullptr);
+    int keys[3] = {0, 0, 0};
+    REQUIRE(w1.containerTree.find(w1.containerTree.root, keys) == nullptr);
+    Container container(1, "Client1", Size(2, 2, 2), 100, 50, Position(0, 0, 0));
+    w1.add_container_hand(container, Position(0, 0, 0));
+    c_ptr = w1.search_container(Position(0, 0, 0));
+    REQUIRE(c_ptr != nullptr);
+    REQUIRE(w1.containerTree.find(w1.containerTree.root, keys) != nullptr);
+}
+
+TEST_CASE("auto add cont") {
+    Warehouse w1(1, Size(10, 10, 10), 27);
+    REQUIRE(w1.containerTree.getRoot() == w1.getTreeRoot());
+    REQUIRE(w1.containerTree.root == w1.containerTree.getRoot());
+    Container container(1, "Client1", Size(2, 2, 2), 100, 50, Position(0, 0, 0));
+    REQUIRE_NOTHROW(w1.add_container_automatically(&container));
+}
+
+TEST_CASE("auto add mp cont") {
+    Warehouse w1(1, Size(10, 10, 10), 27);
+    Container container(1, "Client1", Size(2, 2, 2), 100, 50, Position(0, 0, 0));
+    REQUIRE_NOTHROW(w1.add_container_automatically_mp(&container));
 }
 
 /*

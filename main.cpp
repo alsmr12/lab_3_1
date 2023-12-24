@@ -96,11 +96,11 @@ void performWarehouseActions(Warehouse& warehouse) {
                 }
                 case 3: {
                     // Rotate a specified container
-                    int containerNumber;
+                    Position pos;
                     int newOrientation;
 
-                    std::cout << "Enter container number: ";
-                    std::cin >> containerNumber;
+                    pos = inputPosition();
+
                     std::cout << "Enter new orientation (0 - UP, 1 - DOWN, 2 - LEFT, 3 - RIGHT, 4 - FRONT, 5 - BACK): ";
                     std::cin >> newOrientation;
 
@@ -129,7 +129,7 @@ void performWarehouseActions(Warehouse& warehouse) {
                             return;
                     }
 
-                    //warehouse.rotate_container(containerNumber, orientation);
+                    warehouse.rotate_container(pos, orientation);
                     break;
                 }
                 case 4: {

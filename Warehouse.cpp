@@ -300,7 +300,7 @@ void Warehouse::rotate_container(const Position& position, Orientation orientati
 // Метод для удаления контейнера
 void Warehouse::remove_container(const Position& position) {
     int keys[3] = {position.get_x(), position.get_y(), position.get_z()};
-    containerTree.deleteNode(containerTree.getRoot(), keys);
+    containerTree.root = containerTree.deleteNode(containerTree.getRoot(), keys);
 }
 
 
